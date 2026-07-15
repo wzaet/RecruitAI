@@ -1,16 +1,18 @@
-from app.database.base import Base
-from app.database.session import engine
+from fastapi import FastAPI
 
-# استيراد جميع النماذج
-from app.models.job import Job
+from app.routers.jobs import router as jobs_router
+
+app = FastAPI(
+    title="RecruitAI",
+    version="0.1.0",
+    description="AI-powered recruitment platform"
+)
+
+app.include_router(jobs_router)
 
 
-def main():
-    Base.metadata.create_all(bind=engine)
-    print("RecruitAI Started")
-    print("Database Ready")
-
-
-if __name__ == "__main__":
-    main()
-        
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to RecruitAI"
+    }
