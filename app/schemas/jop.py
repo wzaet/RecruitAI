@@ -12,3 +12,5 @@ class JobCreate(BaseModel):
     education: str | None = None
     description: str | None = None
     deadline: str | None = None
+    class JobUpdate(JobCreate):
+    pass
