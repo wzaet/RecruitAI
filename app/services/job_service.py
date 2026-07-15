@@ -31,3 +31,14 @@ def create_job(job: JobCreate):
 
     finally:
         db.close()
+
+
+def get_jobs():
+    db = SessionLocal()
+
+    try:
+        jobs = db.query(Job).all()
+        return jobs
+
+    finally:
+        db.close()
