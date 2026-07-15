@@ -1,7 +1,9 @@
 import sqlite3
 from pathlib import Path
 
-DB_NAME = Path(__file__).parent / "recruitai.db"
+from app.config import DATABASE_PATH
+
+DB_NAME = DATABASE_PATH
 
 
 class Database:
