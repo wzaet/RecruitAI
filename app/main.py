@@ -1,16 +1,14 @@
-from database.database import Database
+from app.database.base import Base
+from app.database.session import engine
+
+# استيراد جميع النماذج
+from app.models.job import Job
+
 
 def main():
-    print("=" * 40)
-    print(" RecruitAI")
-    print(" AI Recruitment Platform")
-    print("=" * 40)
-
-    db = Database()
-    db.create_tables()
-    db.close()
-
-    print("✓ Database Ready")
+    Base.metadata.create_all(bind=engine)
+    print("RecruitAI Started")
+    print("Database Ready")
 
 
 if __name__ == "__main__":
