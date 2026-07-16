@@ -1,17 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class ApplicantCreate(BaseModel):
     full_name: str
-    email: str
+    email: EmailStr
     phone: str
-    resume_path: str
     job_id: int
 
 
-class ApplicantUpdate(BaseModel):
+class ApplicantResponse(BaseModel):
+    id: int
     full_name: str
     email: str
     phone: str
-    resume_path: str
-    job_id: int
+    resume_path: str | None = None
+
+    class Config:
+        from_attributes = True

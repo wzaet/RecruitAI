@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 
 class JobCreate(BaseModel):
+    owner_id: int
+
     title: str
     department: str | None = None
     location: str | None = None
@@ -12,5 +14,7 @@ class JobCreate(BaseModel):
     education: str | None = None
     description: str | None = None
     deadline: str | None = None
-    class JobUpdate(JobCreate):
+
+
+class JobUpdate(JobCreate):
     pass

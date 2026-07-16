@@ -7,3 +7,6 @@ streamlit
 alembic
 pytest
 black
+passlib[bcrypt]
+bcrypt
+python-jose[cryptography]
