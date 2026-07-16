@@ -7,6 +7,12 @@ from app.database.base import Base
 class User(Base):
 
     __tablename__ = "users"
+    
+    resumes = relationship( 
+    "Resume",
+    back_populates="user",
+    cascade="all, delete-orphan",
+)
 
     id = Column(Integer, primary_key=True, index=True)
 
