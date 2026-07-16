@@ -17,7 +17,11 @@ class User(Base):
     phone = Column(String, unique=True)
 
     password = Column(String, nullable=False)
-
+company_memberships = relationship(
+    "CompanyMember",
+    back_populates="user",
+    cascade="all, delete-orphan",
+)
     role = Column(String, default="candidate")
 
     is_active = Column(Boolean, default=True)
