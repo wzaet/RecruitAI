@@ -1,4 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Text,
+)
+
 from sqlalchemy.orm import relationship
 
 from app.database.base import Base
@@ -18,6 +25,24 @@ class Applicant(Base):
 
     resume_path = Column(String)
 
-    job_id = Column(Integer, ForeignKey("jobs.id"))
+    resume_text = Column(Text)
 
-    job = relationship("Job", back_populates="applicants")
+    skills = Column(Text)
+
+    experience = Column(Text)
+
+    education = Column(Text)
+
+    languages = Column(Text)
+
+    summary = Column(Text)
+
+    job_id = Column(
+        Integer,
+        ForeignKey("jobs.id")
+    )
+
+    job = relationship(
+        "Job",
+        back_populates="applicants"
+    )
