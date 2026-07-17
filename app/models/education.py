@@ -1,5 +1,7 @@
 from sqlalchemy import (
+    Boolean,
     Column,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -10,15 +12,14 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.constants.field_lengths import (
-    MEDIUM_TEXT_LENGTH,
+    LOCATION_LENGTH,
     NAME_LENGTH,
-    SHORT_TEXT_LENGTH,
 )
 from app.database.base import Base
 
 
-class Job(Base):
-    __tablename__ = "jobs"
+class Education(Base):
+    __tablename__ = "educations"
 
     # ==========================
     # Primary Key
@@ -34,22 +35,11 @@ class Job(Base):
     # Foreign Keys
     # ==========================
 
-    owner_id = Column(
+    resume_id = Column(
         Integer,
         ForeignKey(
-            "users.id",
-            name="fk_jobs_owner",
-            ondelete="CASCADE",
-        ),
-        nullable=False,
-        index=True,
-    )
-
-    company_id = Column(
-        Integer,
-        ForeignKey(
-            "companies.id",
-            name="fk_jobs_company",
+            "resumes.id",
+            name="fk_educations_resume",
             ondelete="CASCADE",
         ),
         nullable=False,
@@ -60,36 +50,40 @@ class Job(Base):
     # Business Fields
     # ==========================
 
-    title = Column(
+    institution_name = Column(
         String(NAME_LENGTH),
         nullable=False,
     )
 
-    department = Column(
-        String(MEDIUM_TEXT_LENGTH),
+    degree = Column(
+        String(NAME_LENGTH),
+        nullable=False,
+    )
+
+    field_of_study = Column(
+        String(NAME_LENGTH),
     )
 
     location = Column(
-        String(MEDIUM_TEXT_LENGTH),
+        String(LOCATION_LENGTH),
     )
 
-    employment_type = Column(
-        String(SHORT_TEXT_LENGTH),
+    start_date = Column(
+        Date,
+        nullable=False,
     )
 
-    salary_min = Column(
-        Integer,
+    end_date = Column(
+        Date,
     )
 
-    salary_max = Column(
-        Integer,
+    is_current = Column(
+        Boolean,
+        nullable=False,
+        default=False,
     )
 
-    experience = Column(
-        String(MEDIUM_TEXT_LENGTH),
-    )
-
-    education = Column(
+    grade = Column(
         String(NAME_LENGTH),
     )
 
@@ -97,14 +91,10 @@ class Job(Base):
         Text,
     )
 
-    deadline = Column(
-        String(SHORT_TEXT_LENGTH),
-    )
-
-    status = Column(
-        String(SHORT_TEXT_LENGTH),
+    display_order = Column(
+        Integer,
         nullable=False,
-        default="Open",
+        default=0,
     )
 
     # ==========================
@@ -117,22 +107,18 @@ class Job(Base):
         nullable=False,
     )
 
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
     # ==========================
     # Relationships
     # ==========================
 
-    owner = relationship(
-        "User",
-        back_populates="jobs",
-    )
-
-    company = relationship(
-        "Company",
-        back_populates="jobs",
-    )
-
-    applications = relationship(
-        "Application",
-        back_populates="job",
-        cascade="all, delete-orphan",
+    resume = relationship(
+        "Resume",
+        back_populates="educations",
     )

@@ -1,5 +1,6 @@
 from sqlalchemy import (
     Column,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -10,15 +11,14 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.constants.field_lengths import (
-    MEDIUM_TEXT_LENGTH,
     NAME_LENGTH,
-    SHORT_TEXT_LENGTH,
+    URL_LENGTH,
 )
 from app.database.base import Base
 
 
-class Job(Base):
-    __tablename__ = "jobs"
+class Award(Base):
+    __tablename__ = "awards"
 
     # ==========================
     # Primary Key
@@ -34,22 +34,11 @@ class Job(Base):
     # Foreign Keys
     # ==========================
 
-    owner_id = Column(
+    resume_id = Column(
         Integer,
         ForeignKey(
-            "users.id",
-            name="fk_jobs_owner",
-            ondelete="CASCADE",
-        ),
-        nullable=False,
-        index=True,
-    )
-
-    company_id = Column(
-        Integer,
-        ForeignKey(
-            "companies.id",
-            name="fk_jobs_company",
+            "resumes.id",
+            name="fk_awards_resume",
             ondelete="CASCADE",
         ),
         nullable=False,
@@ -65,46 +54,26 @@ class Job(Base):
         nullable=False,
     )
 
-    department = Column(
-        String(MEDIUM_TEXT_LENGTH),
-    )
-
-    location = Column(
-        String(MEDIUM_TEXT_LENGTH),
-    )
-
-    employment_type = Column(
-        String(SHORT_TEXT_LENGTH),
-    )
-
-    salary_min = Column(
-        Integer,
-    )
-
-    salary_max = Column(
-        Integer,
-    )
-
-    experience = Column(
-        String(MEDIUM_TEXT_LENGTH),
-    )
-
-    education = Column(
+    issuer = Column(
         String(NAME_LENGTH),
+    )
+
+    award_date = Column(
+        Date,
     )
 
     description = Column(
         Text,
     )
 
-    deadline = Column(
-        String(SHORT_TEXT_LENGTH),
+    award_url = Column(
+        String(URL_LENGTH),
     )
 
-    status = Column(
-        String(SHORT_TEXT_LENGTH),
+    display_order = Column(
+        Integer,
         nullable=False,
-        default="Open",
+        default=0,
     )
 
     # ==========================
@@ -117,22 +86,18 @@ class Job(Base):
         nullable=False,
     )
 
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
     # ==========================
     # Relationships
     # ==========================
 
-    owner = relationship(
-        "User",
-        back_populates="jobs",
-    )
-
-    company = relationship(
-        "Company",
-        back_populates="jobs",
-    )
-
-    applications = relationship(
-        "Application",
-        back_populates="job",
-        cascade="all, delete-orphan",
+    resume = relationship(
+        "Resume",
+        back_populates="awards",
     )

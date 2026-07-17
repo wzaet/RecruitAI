@@ -1,25 +1,19 @@
 from sqlalchemy import (
-    Boolean,
     Column,
-    Date,
     DateTime,
     ForeignKey,
     Integer,
     String,
-    Text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.core.constants.field_lengths import (
-    LOCATION_LENGTH,
-    NAME_LENGTH,
-)
+from app.core.constants.field_lengths import NAME_LENGTH
 from app.database.base import Base
 
 
-class Experience(Base):
-    __tablename__ = "experiences"
+class Language(Base):
+    __tablename__ = "languages"
 
     # ==========================
     # Primary Key
@@ -39,21 +33,10 @@ class Experience(Base):
         Integer,
         ForeignKey(
             "resumes.id",
-            name="fk_experiences_resume",
+            name="fk_languages_resume",
             ondelete="CASCADE",
         ),
         nullable=False,
-        index=True,
-    )
-
-    company_id = Column(
-        Integer,
-        ForeignKey(
-            "companies.id",
-            name="fk_experiences_company",
-            ondelete="SET NULL",
-        ),
-        nullable=True,
         index=True,
     )
 
@@ -61,41 +44,14 @@ class Experience(Base):
     # Business Fields
     # ==========================
 
-    job_title = Column(
+    name = Column(
         String(NAME_LENGTH),
         nullable=False,
     )
 
-    company_name = Column(
+    proficiency = Column(
         String(NAME_LENGTH),
         nullable=False,
-    )
-
-    location = Column(
-        String(LOCATION_LENGTH),
-    )
-
-    employment_type = Column(
-        String(NAME_LENGTH),
-    )
-
-    start_date = Column(
-        Date,
-        nullable=False,
-    )
-
-    end_date = Column(
-        Date,
-    )
-
-    is_current = Column(
-        Boolean,
-        nullable=False,
-        default=False,
-    )
-
-    description = Column(
-        Text,
     )
 
     display_order = Column(
@@ -127,9 +83,5 @@ class Experience(Base):
 
     resume = relationship(
         "Resume",
-        back_populates="experiences",
-    )
-
-    company = relationship(
-        "Company",
+        back_populates="languages",
     )

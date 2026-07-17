@@ -12,14 +12,14 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.constants.field_lengths import (
-    LOCATION_LENGTH,
     NAME_LENGTH,
+    URL_LENGTH,
 )
 from app.database.base import Base
 
 
-class Experience(Base):
-    __tablename__ = "experiences"
+class Project(Base):
+    __tablename__ = "projects"
 
     # ==========================
     # Primary Key
@@ -39,21 +39,10 @@ class Experience(Base):
         Integer,
         ForeignKey(
             "resumes.id",
-            name="fk_experiences_resume",
+            name="fk_projects_resume",
             ondelete="CASCADE",
         ),
         nullable=False,
-        index=True,
-    )
-
-    company_id = Column(
-        Integer,
-        ForeignKey(
-            "companies.id",
-            name="fk_experiences_company",
-            ondelete="SET NULL",
-        ),
-        nullable=True,
         index=True,
     )
 
@@ -61,41 +50,43 @@ class Experience(Base):
     # Business Fields
     # ==========================
 
-    job_title = Column(
+    name = Column(
         String(NAME_LENGTH),
         nullable=False,
     )
 
-    company_name = Column(
+    role = Column(
         String(NAME_LENGTH),
-        nullable=False,
     )
 
-    location = Column(
-        String(LOCATION_LENGTH),
+    organization = Column(
+        String(NAME_LENGTH),
     )
 
-    employment_type = Column(
-        String(NAME_LENGTH),
+    description = Column(
+        Text,
+    )
+
+    project_url = Column(
+        String(URL_LENGTH),
+    )
+
+    repository_url = Column(
+        String(URL_LENGTH),
     )
 
     start_date = Column(
         Date,
-        nullable=False,
     )
 
     end_date = Column(
         Date,
     )
 
-    is_current = Column(
+    is_ongoing = Column(
         Boolean,
         nullable=False,
         default=False,
-    )
-
-    description = Column(
-        Text,
     )
 
     display_order = Column(
@@ -127,9 +118,5 @@ class Experience(Base):
 
     resume = relationship(
         "Resume",
-        back_populates="experiences",
-    )
-
-    company = relationship(
-        "Company",
+        back_populates="projects",
     )

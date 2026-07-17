@@ -15,14 +15,20 @@ class User(Base):
     __tablename__ = "users"
     __table_args__ = ()
 
+    # ==========================
     # Primary Key
+    # ==========================
+
     id = Column(
         Integer,
         primary_key=True,
         index=True,
     )
 
+    # ==========================
     # Business Fields
+    # ==========================
+
     full_name = Column(
         String(NAME_LENGTH),
         nullable=False,
@@ -55,7 +61,10 @@ class User(Base):
         default=True,
     )
 
+    # ==========================
     # Relationships
+    # ==========================
+
     resumes = relationship(
         "Resume",
         back_populates="user",
@@ -69,6 +78,12 @@ class User(Base):
 
     company_memberships = relationship(
         "CompanyMember",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    applications = relationship(
+        "Application",
         back_populates="user",
         cascade="all, delete-orphan",
     )

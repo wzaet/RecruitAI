@@ -174,8 +174,3 @@ class Resume(Base):
         back_populates="resume",
         cascade="all, delete-orphan",
     )
-
-    applications = relationship(
-        "Application",
-        back_populates="resume",
-    )

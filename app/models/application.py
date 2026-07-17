@@ -1,25 +1,18 @@
 from sqlalchemy import (
-    Boolean,
     Column,
-    Date,
     DateTime,
     ForeignKey,
     Integer,
-    String,
     Text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.core.constants.field_lengths import (
-    LOCATION_LENGTH,
-    NAME_LENGTH,
-)
 from app.database.base import Base
 
 
-class Experience(Base):
-    __tablename__ = "experiences"
+class Application(Base):
+    __tablename__ = "applications"
 
     # ==========================
     # Primary Key
@@ -35,22 +28,33 @@ class Experience(Base):
     # Foreign Keys
     # ==========================
 
-    resume_id = Column(
+    user_id = Column(
         Integer,
         ForeignKey(
-            "resumes.id",
-            name="fk_experiences_resume",
+            "users.id",
+            name="fk_applications_user",
             ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
     )
 
-    company_id = Column(
+    job_id = Column(
         Integer,
         ForeignKey(
-            "companies.id",
-            name="fk_experiences_company",
+            "jobs.id",
+            name="fk_applications_job",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    resume_id = Column(
+        Integer,
+        ForeignKey(
+            "resumes.id",
+            name="fk_applications_resume",
             ondelete="SET NULL",
         ),
         nullable=True,
@@ -61,47 +65,14 @@ class Experience(Base):
     # Business Fields
     # ==========================
 
-    job_title = Column(
-        String(NAME_LENGTH),
-        nullable=False,
-    )
-
-    company_name = Column(
-        String(NAME_LENGTH),
-        nullable=False,
-    )
-
-    location = Column(
-        String(LOCATION_LENGTH),
-    )
-
-    employment_type = Column(
-        String(NAME_LENGTH),
-    )
-
-    start_date = Column(
-        Date,
-        nullable=False,
-    )
-
-    end_date = Column(
-        Date,
-    )
-
-    is_current = Column(
-        Boolean,
-        nullable=False,
-        default=False,
-    )
-
-    description = Column(
-        Text,
-    )
-
-    display_order = Column(
+    status = Column(
         Integer,
         nullable=False,
-        default=0,
+        default=1,
+    )
+
+    cover_letter = Column(
+        Text,
     )
 
     # ==========================
@@ -125,11 +96,17 @@ class Experience(Base):
     # Relationships
     # ==========================
 
-    resume = relationship(
-        "Resume",
-        back_populates="experiences",
+    user = relationship(
+        "User",
+        back_populates="applications",
     )
 
-    company = relationship(
-        "Company",
+    job = relationship(
+        "Job",
+        back_populates="applications",
+    )
+
+    resume = relationship(
+        "Resume",
+        back_populates="applications",
     )

@@ -105,3 +105,8 @@ class Company(Base):
         back_populates="company",
         cascade="all, delete-orphan",
     )
+
+    experiences = relationship(
+        "Experience",
+        back_populates="company",
+    )

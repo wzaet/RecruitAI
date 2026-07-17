@@ -6,20 +6,19 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    Text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.core.constants.field_lengths import (
-    LOCATION_LENGTH,
     NAME_LENGTH,
+    URL_LENGTH,
 )
 from app.database.base import Base
 
 
-class Experience(Base):
-    __tablename__ = "experiences"
+class Certificate(Base):
+    __tablename__ = "certificates"
 
     # ==========================
     # Primary Key
@@ -39,21 +38,10 @@ class Experience(Base):
         Integer,
         ForeignKey(
             "resumes.id",
-            name="fk_experiences_resume",
+            name="fk_certificates_resume",
             ondelete="CASCADE",
         ),
         nullable=False,
-        index=True,
-    )
-
-    company_id = Column(
-        Integer,
-        ForeignKey(
-            "companies.id",
-            name="fk_experiences_company",
-            ondelete="SET NULL",
-        ),
-        nullable=True,
         index=True,
     )
 
@@ -61,41 +49,36 @@ class Experience(Base):
     # Business Fields
     # ==========================
 
-    job_title = Column(
+    name = Column(
         String(NAME_LENGTH),
         nullable=False,
     )
 
-    company_name = Column(
+    issuing_organization = Column(
         String(NAME_LENGTH),
         nullable=False,
     )
 
-    location = Column(
-        String(LOCATION_LENGTH),
-    )
-
-    employment_type = Column(
-        String(NAME_LENGTH),
-    )
-
-    start_date = Column(
-        Date,
-        nullable=False,
-    )
-
-    end_date = Column(
+    issue_date = Column(
         Date,
     )
 
-    is_current = Column(
+    expiration_date = Column(
+        Date,
+    )
+
+    credential_id = Column(
+        String(NAME_LENGTH),
+    )
+
+    credential_url = Column(
+        String(URL_LENGTH),
+    )
+
+    does_not_expire = Column(
         Boolean,
         nullable=False,
         default=False,
-    )
-
-    description = Column(
-        Text,
     )
 
     display_order = Column(
@@ -127,9 +110,5 @@ class Experience(Base):
 
     resume = relationship(
         "Resume",
-        back_populates="experiences",
-    )
-
-    company = relationship(
-        "Company",
+        back_populates="certificates",
     )
