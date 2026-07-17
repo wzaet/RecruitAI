@@ -7,11 +7,18 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+from app.core.constants.field_lengths import (
+    NAME_LENGTH,
+)
 from app.database.base import Base
 
 
 class Skill(Base):
     __tablename__ = "skills"
+
+    # ==========================
+    # Primary Key
+    # ==========================
 
     id = Column(
         Integer,
@@ -19,18 +26,30 @@ class Skill(Base):
         index=True,
     )
 
+    # ==========================
+    # Business Fields
+    # ==========================
+
     name = Column(
-        String(100),
+        String(NAME_LENGTH),
         unique=True,
         nullable=False,
         index=True,
     )
+
+    # ==========================
+    # Audit Fields
+    # ==========================
 
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
     )
+
+    # ==========================
+    # Relationships
+    # ==========================
 
     resumes = relationship(
         "ResumeSkill",

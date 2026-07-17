@@ -10,11 +10,20 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+from app.core.constants.field_lengths import (
+    LOCATION_LENGTH,
+    NAME_LENGTH,
+    URL_LENGTH,
+)
 from app.database.base import Base
 
 
 class Resume(Base):
     __tablename__ = "resumes"
+
+    # ==========================
+    # Primary Key
+    # ==========================
 
     id = Column(
         Integer,
@@ -22,28 +31,38 @@ class Resume(Base):
         index=True,
     )
 
+    # ==========================
+    # Foreign Keys
+    # ==========================
+
     user_id = Column(
         Integer,
-        ForeignKey("users.id"),
+        ForeignKey(
+            "users.id",
+            name="fk_resumes_user",
+            ondelete="CASCADE",
+        ),
         nullable=False,
         index=True,
     )
 
+    # ==========================
+    # Business Fields
+    # ==========================
+
     title = Column(
-        String(150),
+        String(NAME_LENGTH),
         nullable=False,
     )
 
-    summary = Column(
-        Text,
-    )
+    summary = Column(Text)
 
     current_position = Column(
-        String(150),
+        String(NAME_LENGTH),
     )
 
     current_company = Column(
-        String(150),
+        String(NAME_LENGTH),
     )
 
     years_of_experience = Column(
@@ -53,15 +72,15 @@ class Resume(Base):
     )
 
     city = Column(
-        String(100),
+        String(LOCATION_LENGTH),
     )
 
     country = Column(
-        String(100),
+        String(LOCATION_LENGTH),
     )
 
     resume_file = Column(
-        String(255),
+        String(URL_LENGTH),
     )
 
     parsed = Column(
@@ -76,6 +95,10 @@ class Resume(Base):
         default=True,
     )
 
+    # ==========================
+    # Audit Fields
+    # ==========================
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -88,6 +111,10 @@ class Resume(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+    # ==========================
+    # Relationships
+    # ==========================
 
     user = relationship(
         "User",

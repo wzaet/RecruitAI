@@ -1,69 +1,107 @@
 from sqlalchemy import (
+    Boolean,
     Column,
+    DateTime,
     Integer,
     String,
-    Boolean,
-    DateTime,
     Text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+from app.core.constants.field_lengths import (
+    EMAIL_LENGTH,
+    LOCATION_LENGTH,
+    LONG_TEXT_LENGTH,
+    NAME_LENGTH,
+    PHONE_LENGTH,
+    SLUG_LENGTH,
+    URL_LENGTH,
+)
 from app.database.base import Base
 
 
 class Company(Base):
     __tablename__ = "companies"
 
+    # ==========================
+    # Primary Key
+    # ==========================
+
     id = Column(Integer, primary_key=True, index=True)
 
-    name = Column(String(200), nullable=False)
+    # ==========================
+    # Business Fields
+    # ==========================
 
-    slug = Column(String(200), unique=True, nullable=False)
+    name = Column(
+        String(NAME_LENGTH),
+        nullable=False,
+    )
+
+    slug = Column(
+        String(SLUG_LENGTH),
+        unique=True,
+        nullable=False,
+    )
 
     description = Column(Text)
 
-    industry = Column(String(100))
+    industry = Column(String(NAME_LENGTH))
 
-    company_size = Column(String(50))
+    company_size = Column(String(LONG_TEXT_LENGTH))
 
-    website = Column(String(255))
+    website = Column(String(URL_LENGTH))
 
-    email = Column(String(255))
+    email = Column(String(EMAIL_LENGTH))
 
-    phone = Column(String(50))
+    phone = Column(String(PHONE_LENGTH))
 
-    country = Column(String(100))
+    country = Column(String(LOCATION_LENGTH))
 
-    city = Column(String(100))
+    city = Column(String(LOCATION_LENGTH))
 
-    address = Column(String(255))
+    address = Column(String(LOCATION_LENGTH))
 
-    logo_url = Column(String(255))
+    logo_url = Column(String(URL_LENGTH))
 
-    is_verified = Column(Boolean, default=False)
+    is_verified = Column(
+        Boolean,
+        default=False,
+    )
 
-    is_active = Column(Boolean, default=True)
+    is_active = Column(
+        Boolean,
+        default=True,
+    )
+
+    # ==========================
+    # Audit Fields
+    # ==========================
 
     created_at = Column(
         DateTime(timezone=True),
-        server_default=func.now()
+        server_default=func.now(),
     )
 
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
-        onupdate=func.now()
+        onupdate=func.now(),
     )
+
+    # ==========================
+    # Relationships
+    # ==========================
 
     jobs = relationship(
         "Job",
         back_populates="company",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
     members = relationship(
         "CompanyMember",
         back_populates="company",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )

@@ -13,19 +13,35 @@ from app.database.base import Base
 class ResumeSkill(Base):
     __tablename__ = "resume_skills"
 
+    # ==========================
+    # Composite Primary Key
+    # ==========================
+
     resume_id = Column(
         Integer,
-        ForeignKey("resumes.id"),
+        ForeignKey(
+            "resumes.id",
+            name="fk_resume_skills_resume",
+            ondelete="CASCADE",
+        ),
         primary_key=True,
         nullable=False,
     )
 
     skill_id = Column(
         Integer,
-        ForeignKey("skills.id"),
+        ForeignKey(
+            "skills.id",
+            name="fk_resume_skills_skill",
+            ondelete="CASCADE",
+        ),
         primary_key=True,
         nullable=False,
     )
+
+    # ==========================
+    # Business Fields
+    # ==========================
 
     level = Column(
         Integer,
@@ -49,6 +65,10 @@ class ResumeSkill(Base):
         nullable=False,
         default=False,
     )
+
+    # ==========================
+    # Relationships
+    # ==========================
 
     resume = relationship(
         "Resume",

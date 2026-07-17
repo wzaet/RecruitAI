@@ -1,64 +1,113 @@
 from sqlalchemy import (
     Column,
-    Integer,
-    String,
     DateTime,
     ForeignKey,
+    Integer,
+    String,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+from app.core.constants.field_lengths import (
+    LONG_TEXT_LENGTH,
+    MEDIUM_TEXT_LENGTH,
+    NAME_LENGTH,
+    SHORT_TEXT_LENGTH,
+)
 from app.database.base import Base
 
 
 class Job(Base):
     __tablename__ = "jobs"
 
+    # ==========================
+    # Primary Key
+    # ==========================
+
     id = Column(Integer, primary_key=True, index=True)
+
+    # ==========================
+    # Foreign Keys
+    # ==========================
 
     owner_id = Column(
         Integer,
-        ForeignKey("users.id"),
+        ForeignKey(
+            "users.id",
+            name="fk_jobs_owner",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     )
 
-    title = Column(String(200), nullable=False)
+    company_id = Column(
+        Integer,
+        ForeignKey(
+            "companies.id",
+            name="fk_jobs_company",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
 
-    department = Column(String(100))
+    # ==========================
+    # Business Fields
+    # ==========================
 
-    location = Column(String(100))
+    title = Column(
+        String(NAME_LENGTH),
+        nullable=False,
+    )
 
-    employment_type = Column(String(50))
+    department = Column(String(MEDIUM_TEXT_LENGTH))
+
+    location = Column(String(MEDIUM_TEXT_LENGTH))
+
+    employment_type = Column(String(SHORT_TEXT_LENGTH))
 
     salary_min = Column(Integer)
 
     salary_max = Column(Integer)
 
-    experience = Column(String(100))
+    experience = Column(String(MEDIUM_TEXT_LENGTH))
 
-    education = Column(String(200))
+    education = Column(String(NAME_LENGTH))
 
     description = Column(String)
 
     deadline = Column(String)
 
     status = Column(
-        String(20),
-        default="Open"
+        String(SHORT_TEXT_LENGTH),
+        default="Open",
+        nullable=False,
     )
+
+    # ==========================
+    # Audit Fields
+    # ==========================
 
     created_at = Column(
         DateTime(timezone=True),
-        server_default=func.now()
+        server_default=func.now(),
     )
+
+    # ==========================
+    # Relationships
+    # ==========================
 
     owner = relationship(
         "User",
-        back_populates="jobs"
+        back_populates="jobs",
+    )
+
+    company = relationship(
+        "Company",
+        back_populates="jobs",
     )
 
     applicants = relationship(
         "Applicant",
         back_populates="job",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
