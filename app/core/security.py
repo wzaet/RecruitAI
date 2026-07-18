@@ -1,23 +1,65 @@
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from jose import jwt
+from passlib.context import CryptContext
 
-SECRET_KEY = "CHANGE_THIS_SECRET_KEY_TO_A_RANDOM_STRING"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+from app.core.config import settings
 
 
-def create_access_token(data: dict):
-    to_encode = data.copy()
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+)
 
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+
+def hash_password(password: str) -> str:
+    """Hash a plain-text password."""
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain-text password against its hash."""
+    return pwd_context.verify(
+        plain_password,
+        hashed_password,
     )
 
-    to_encode.update({"exp": expire})
+
+def create_access_token(
+    subject: Any,
+    expires_delta: timedelta | None = None,
+) -> str:
+    """
+    Create a signed JWT access token.
+    """
+
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+
+    payload = {
+        "sub": str(subject),
+        "exp": expire,
+    }
 
     return jwt.encode(
-        to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM
+        payload,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
+    )
+
+
+def decode_access_token(token: str) -> dict:
+    """
+    Decode and validate a JWT access token.
+    """
+
+    return jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
     )

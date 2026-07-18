@@ -1,4 +1,5 @@
 from .applications import router as applications_router
+from .auth import router as auth_router
 from .awards import router as awards_router
 from .certificates import router as certificates_router
 from .companies import router as companies_router

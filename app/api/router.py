@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.routers import (
     applications_router,
+    auth_router,
     awards_router,
     certificates_router,
     companies_router,
@@ -21,11 +22,19 @@ from app.routers import (
 
 api_router = APIRouter()
 
+# Authentication
+api_router.include_router(auth_router)
+
+# Users & Companies
 api_router.include_router(users_router)
 api_router.include_router(companies_router)
 api_router.include_router(company_members_router)
+
+# Jobs & Applications
 api_router.include_router(jobs_router)
 api_router.include_router(applications_router)
+
+# Resume
 api_router.include_router(resumes_router)
 api_router.include_router(experiences_router)
 api_router.include_router(educations_router)

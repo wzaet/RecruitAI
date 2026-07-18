@@ -15,15 +15,9 @@ class UserService(BaseService[User]):
         db: Session,
         email: str,
     ) -> User | None:
-        statement = select(User).where(User.email == email)
-        return db.scalar(statement)
-
-    def get_by_username(
-        self,
-        db: Session,
-        username: str,
-    ) -> User | None:
-        statement = select(User).where(User.username == username)
+        statement = select(User).where(
+            User.email == email,
+        )
         return db.scalar(statement)
 
     def email_exists(
@@ -31,22 +25,24 @@ class UserService(BaseService[User]):
         db: Session,
         email: str,
     ) -> bool:
-        return self.get_by_email(db, email) is not None
-
-    def username_exists(
-        self,
-        db: Session,
-        username: str,
-    ) -> bool:
-        return self.get_by_username(db, username) is not None
+        return self.get_by_email(
+            db=db,
+            email=email,
+        ) is not None
 
     def create_user(
         self,
         db: Session,
         user_data: UserCreate,
+        hashed_password: str,
     ) -> User:
         user = User(
-            **user_data.model_dump(),
+            full_name=user_data.full_name,
+            email=user_data.email,
+            phone=user_data.phone,
+            hashed_password=hashed_password,
+            role=user_data.role,
+            is_active=user_data.is_active,
         )
 
         return self.create(
@@ -62,6 +58,11 @@ class UserService(BaseService[User]):
     ) -> User:
         update_data = user_data.model_dump(
             exclude_unset=True,
+        )
+
+        update_data.pop(
+            "password",
+            None,
         )
 
         for field, value in update_data.items():
