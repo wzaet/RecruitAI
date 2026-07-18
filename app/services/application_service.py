@@ -5,71 +5,48 @@ from app.schemas.application import (
     ApplicationCreate,
     ApplicationUpdate,
 )
+from app.services.base_service import BaseService
 
 
-class ApplicationService:
-
-    def get(
-        self,
-        db: Session,
-        obj_id: int,
-    ):
-        return (
-            db.query(Application)
-            .filter(Application.id == obj_id)
-            .first()
-        )
-
-    def get_all(
-        self,
-        db: Session,
-    ):
-        return db.query(Application).all()
+class ApplicationService(BaseService[Application]):
+    def __init__(self) -> None:
+        super().__init__(Application)
 
     def create_application(
         self,
         db: Session,
         application_data: ApplicationCreate,
-    ):
+    ) -> Application:
         application = Application(
-            **application_data.model_dump()
+            **application_data.model_dump(),
         )
 
-        db.add(application)
-        db.commit()
-        db.refresh(application)
-
-        return application
+        return self.create(
+            db=db,
+            obj=application,
+        )
 
     def update_application(
         self,
         db: Session,
         application: Application,
         application_data: ApplicationUpdate,
-    ):
+    ) -> Application:
         update_data = application_data.model_dump(
-            exclude_unset=True
+            exclude_unset=True,
         )
 
-        for key, value in update_data.items():
+        for field, value in update_data.items():
             setattr(
                 application,
-                key,
+                field,
                 value,
             )
 
-        db.commit()
-        db.refresh(application)
-
-        return application
-
-    def delete(
-        self,
-        db: Session,
-        obj: Application,
-    ):
-        db.delete(obj)
-        db.commit()
+        return self.update(
+            db=db,
+            obj=application,
+        )
 
 
 application_service = ApplicationService()
