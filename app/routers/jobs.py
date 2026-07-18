@@ -1,45 +1,104 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
-from app.models.user import User
-from app.schemas.job import JobCreate, JobUpdate
-from app.services.job_service import (
-    create_job,
-    get_jobs,
-    update_job,
-    delete_job,
+from app.database.session import get_db
+from app.schemas.job import (
+    JobCreate,
+    JobResponse,
+    JobUpdate,
 )
+from app.services.job_service import job_service
 
 router = APIRouter(
     prefix="/jobs",
-    tags=["Jobs"]
+    tags=["Jobs"],
 )
 
 
-@router.get("/")
-def list_jobs():
-    return get_jobs()
-
-
-@router.post("/")
-def add_job(
-    job: JobCreate,
-    current_user: User = Depends(get_current_user)
+@router.get(
+    "/{job_id}",
+    response_model=JobResponse,
+)
+def get_job(
+    job_id: int,
+    db: Session = Depends(get_db),
 ):
-    return create_job(
-        job,
-        current_user.id
+    job = job_service.get(
+        db=db,
+        obj_id=job_id,
+    )
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    return job
+
+
+@router.post(
+    "/",
+    response_model=JobResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_job(
+    job_data: JobCreate,
+    db: Session = Depends(get_db),
+):
+    return job_service.create_job(
+        db=db,
+        job_data=job_data,
     )
 
 
-@router.put("/{job_id}")
-def edit_job(
+@router.put(
+    "/{job_id}",
+    response_model=JobResponse,
+)
+def update_job(
     job_id: int,
-    job: JobUpdate
+    job_data: JobUpdate,
+    db: Session = Depends(get_db),
 ):
-    return update_job(job_id, job)
+    job = job_service.get(
+        db=db,
+        obj_id=job_id,
+    )
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    return job_service.update_job(
+        db=db,
+        job=job,
+        job_data=job_data,
+    )
 
 
-@router.delete("/{job_id}")
-def remove_job(job_id: int):
-    return delete_job(job_id)
+@router.delete(
+    "/{job_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+):
+    job = job_service.get(
+        db=db,
+        obj_id=job_id,
+    )
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    job_service.delete(
+        db=db,
+        obj=job,
+    )

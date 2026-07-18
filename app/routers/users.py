@@ -1,64 +1,105 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-from app.schemas.user import UserRegister, UserLogin
-from app.services.user_service import (
-    register_user,
-    authenticate_user,
+from app.database.session import get_db
+from app.schemas.user import (
+    UserCreate,
+    UserResponse,
+    UserUpdate,
 )
-from app.core.security import create_access_token
+from app.services.user_service import user_service
+
 
 router = APIRouter(
     prefix="/users",
-    tags=["Users"]
+    tags=["Users"],
 )
 
 
-@router.post("/register")
-def register(user: UserRegister):
-    result = register_user(
-        full_name=user.full_name,
-        email=user.email,
-        phone=user.phone,
-        password=user.password,
-        role=user.role,
+@router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+)
+def get_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    user = user_service.get(
+        db=db,
+        obj_id=user_id,
     )
 
-    if "error" in result:
+    if user is None:
         raise HTTPException(
-            status_code=400,
-            detail=result["error"]
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
 
-    return result
+    return user
 
 
-@router.post("/login")
-def login(user: UserLogin):
-    db_user = authenticate_user(
-        user.email,
-        user.password
+@router.post(
+    "/",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+):
+    return user_service.create_user(
+        db=db,
+        user_data=user_data,
     )
 
-    if not db_user:
+
+@router.put(
+    "/{user_id}",
+    response_model=UserResponse,
+)
+def update_user(
+    user_id: int,
+    user_data: UserUpdate,
+    db: Session = Depends(get_db),
+):
+    user = user_service.get(
+        db=db,
+        obj_id=user_id,
+    )
+
+    if user is None:
         raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
 
-    token = create_access_token(
-        {
-            "sub": str(db_user.id),
-            "role": db_user.role,
-        }
+    return user_service.update_user(
+        db=db,
+        user=user,
+        user_data=user_data,
     )
 
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": db_user.id,
-            "full_name": db_user.full_name,
-            "email": db_user.email,
-            "role": db_user.role,
-        },
-    }
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    user = user_service.get(
+        db=db,
+        obj_id=user_id,
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user_service.delete(
+        db=db,
+        obj=user,
+    )

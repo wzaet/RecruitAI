@@ -1,0 +1,16 @@
+from .applications import router as applications_router
+from .awards import router as awards_router
+from .certificates import router as certificates_router
+from .companies import router as companies_router
+from .company_members import router as company_members_router
+from .educations import router as educations_router
+from .experiences import router as experiences_router
+from .jobs import router as jobs_router
+from .languages import router as languages_router
+from .projects import router as projects_router
+from .references import router as references_router
+from .resume_links import router as resume_links_router
+from .resume_skills import router as resume_skills_router
+from .resumes import router as resumes_router
+from .skills import router as skills_router
+from .users import router as users_router
