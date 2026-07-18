@@ -13,7 +13,6 @@ from app.database.base import Base
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = ()
 
     # ==========================
     # Primary Key
@@ -26,7 +25,7 @@ class User(Base):
     )
 
     # ==========================
-    # Business Fields
+    # User Information
     # ==========================
 
     full_name = Column(
@@ -44,20 +43,23 @@ class User(Base):
     phone = Column(
         String(PHONE_LENGTH),
         unique=True,
+        nullable=True,
     )
 
-    password = Column(
+    hashed_password = Column(
         String(PASSWORD_LENGTH),
         nullable=False,
     )
 
     role = Column(
         String(ROLE_LENGTH),
+        nullable=False,
         default="candidate",
     )
 
     is_active = Column(
         Boolean,
+        nullable=False,
         default=True,
     )
 
