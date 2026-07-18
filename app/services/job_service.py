@@ -2,7 +2,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.job import Job
-from app.schemas.job import JobCreate, JobUpdate
+from app.schemas.job import (
+    JobCreate,
+    JobUpdate,
+)
 from app.services.base_service import BaseService
 
 
@@ -19,7 +22,9 @@ class JobService(BaseService[Job]):
             Job.company_id == company_id,
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def get_active_jobs(
         self,
@@ -29,7 +34,9 @@ class JobService(BaseService[Job]):
             Job.is_active.is_(True),
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def create_job(
         self,
@@ -73,6 +80,7 @@ class JobService(BaseService[Job]):
         job: Job,
     ) -> Job:
         job.is_active = True
+
         return self.update(
             db=db,
             obj=job,
@@ -84,6 +92,7 @@ class JobService(BaseService[Job]):
         job: Job,
     ) -> Job:
         job.is_active = False
+
         return self.update(
             db=db,
             obj=job,

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.project import (
     ProjectCreate,
@@ -9,18 +13,26 @@ from app.schemas.project import (
 )
 from app.services.project_service import project_service
 
+
 router = APIRouter(
     prefix="/projects",
     tags=["Projects"],
 )
 
 
-@router.get("/{project_id}", response_model=ProjectResponse)
+@router.get(
+    "/{project_id}",
+    response_model=ProjectResponse,
+)
 def get_project(
     project_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    project = project_service.get(db=db, obj_id=project_id)
+    project = project_service.get(
+        db=db,
+        obj_id=project_id,
+    )
 
     if project is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_project(
 def create_project(
     project_data: ProjectCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return project_service.create_project(
         db=db,
@@ -46,13 +59,20 @@ def create_project(
     )
 
 
-@router.put("/{project_id}", response_model=ProjectResponse)
+@router.put(
+    "/{project_id}",
+    response_model=ProjectResponse,
+)
 def update_project(
     project_id: int,
     project_data: ProjectUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    project = project_service.get(db=db, obj_id=project_id)
+    project = project_service.get(
+        db=db,
+        obj_id=project_id,
+    )
 
     if project is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_project(
 def delete_project(
     project_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    project = project_service.get(db=db, obj_id=project_id)
+    project = project_service.get(
+        db=db,
+        obj_id=project_id,
+    )
 
     if project is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_project(
             detail="Project not found",
         )
 
-    project_service.delete(db=db, obj=project)
+    project_service.delete(
+        db=db,
+        obj=project,
+    )

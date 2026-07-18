@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.application import (
     ApplicationCreate,
@@ -8,6 +12,7 @@ from app.schemas.application import (
     ApplicationUpdate,
 )
 from app.services.application_service import application_service
+
 
 router = APIRouter(
     prefix="/applications",
@@ -22,6 +27,7 @@ router = APIRouter(
 def get_application(
     application_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     application = application_service.get(
         db=db,
@@ -45,6 +51,7 @@ def get_application(
 def create_application(
     application_data: ApplicationCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return application_service.create_application(
         db=db,
@@ -60,6 +67,7 @@ def update_application(
     application_id: int,
     application_data: ApplicationUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     application = application_service.get(
         db=db,
@@ -86,6 +94,7 @@ def update_application(
 def delete_application(
     application_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
     application = application_service.get(
         db=db,

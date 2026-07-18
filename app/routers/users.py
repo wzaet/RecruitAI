@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.user import (
-    UserCreate,
     UserResponse,
     UserUpdate,
 )
@@ -23,11 +26,9 @@ router = APIRouter(
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    user = user_service.get(
-        db=db,
-        obj_id=user_id,
-    )
+    user = user_service.get(db=db, obj_id=user_id)
 
     if user is None:
         raise HTTPException(
@@ -38,21 +39,6 @@ def get_user(
     return user
 
 
-@router.post(
-    "/",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_user(
-    user_data: UserCreate,
-    db: Session = Depends(get_db),
-):
-    return user_service.create_user(
-        db=db,
-        user_data=user_data,
-    )
-
-
 @router.put(
     "/{user_id}",
     response_model=UserResponse,
@@ -61,11 +47,9 @@ def update_user(
     user_id: int,
     user_data: UserUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    user = user_service.get(
-        db=db,
-        obj_id=user_id,
-    )
+    user = user_service.get(db=db, obj_id=user_id)
 
     if user is None:
         raise HTTPException(
@@ -87,11 +71,9 @@ def update_user(
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    user = user_service.get(
-        db=db,
-        obj_id=user_id,
-    )
+    user = user_service.get(db=db, obj_id=user_id)
 
     if user is None:
         raise HTTPException(

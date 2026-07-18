@@ -19,7 +19,9 @@ class BaseService(Generic[ModelType]):
         db: Session,
         obj_id: int,
     ) -> ModelType | None:
-        statement = select(self.model).where(self.model.id == obj_id)
+        statement = select(self.model).where(
+            self.model.id == obj_id,
+        )
         return db.scalar(statement)
 
     def get_all(
@@ -27,7 +29,7 @@ class BaseService(Generic[ModelType]):
         db: Session,
     ) -> list[ModelType]:
         statement = select(self.model)
-        return list(db.scalars(statement))
+        return list(db.scalars(statement).all())
 
     def create(
         self,
@@ -44,6 +46,7 @@ class BaseService(Generic[ModelType]):
         db: Session,
         obj: ModelType,
     ) -> ModelType:
+        db.add(obj)
         db.commit()
         db.refresh(obj)
         return obj

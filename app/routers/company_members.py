@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.company_member import (
     CompanyMemberCreate,
@@ -8,6 +12,7 @@ from app.schemas.company_member import (
     CompanyMemberUpdate,
 )
 from app.services.company_member_service import company_member_service
+
 
 router = APIRouter(
     prefix="/company-members",
@@ -22,6 +27,7 @@ router = APIRouter(
 def get_company_member(
     member_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     member = company_member_service.get(
         db=db,
@@ -45,6 +51,7 @@ def get_company_member(
 def create_company_member(
     member_data: CompanyMemberCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return company_member_service.create_membership(
         db=db,
@@ -60,6 +67,7 @@ def update_company_member(
     member_id: int,
     member_data: CompanyMemberUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     member = company_member_service.get(
         db=db,
@@ -86,6 +94,7 @@ def update_company_member(
 def delete_company_member(
     member_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
     member = company_member_service.get(
         db=db,

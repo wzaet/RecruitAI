@@ -22,7 +22,9 @@ class EducationService(BaseService[Education]):
             Education.resume_id == resume_id,
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def create_education(
         self,

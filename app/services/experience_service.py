@@ -22,7 +22,9 @@ class ExperienceService(BaseService[Experience]):
             Experience.resume_id == resume_id,
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def create_experience(
         self,

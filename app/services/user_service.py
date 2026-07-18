@@ -2,7 +2,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import (
+    UserCreate,
+    UserUpdate,
+)
 from app.services.base_service import BaseService
 
 
@@ -18,6 +21,7 @@ class UserService(BaseService[User]):
         statement = select(User).where(
             User.email == email,
         )
+
         return db.scalar(statement)
 
     def email_exists(
@@ -25,10 +29,13 @@ class UserService(BaseService[User]):
         db: Session,
         email: str,
     ) -> bool:
-        return self.get_by_email(
-            db=db,
-            email=email,
-        ) is not None
+        return (
+            self.get_by_email(
+                db=db,
+                email=email,
+            )
+            is not None
+        )
 
     def create_user(
         self,

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.experience import (
     ExperienceCreate,
@@ -9,18 +13,26 @@ from app.schemas.experience import (
 )
 from app.services.experience_service import experience_service
 
+
 router = APIRouter(
     prefix="/experiences",
     tags=["Experiences"],
 )
 
 
-@router.get("/{experience_id}", response_model=ExperienceResponse)
+@router.get(
+    "/{experience_id}",
+    response_model=ExperienceResponse,
+)
 def get_experience(
     experience_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    experience = experience_service.get(db=db, obj_id=experience_id)
+    experience = experience_service.get(
+        db=db,
+        obj_id=experience_id,
+    )
 
     if experience is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_experience(
 def create_experience(
     experience_data: ExperienceCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return experience_service.create_experience(
         db=db,
@@ -46,13 +59,20 @@ def create_experience(
     )
 
 
-@router.put("/{experience_id}", response_model=ExperienceResponse)
+@router.put(
+    "/{experience_id}",
+    response_model=ExperienceResponse,
+)
 def update_experience(
     experience_id: int,
     experience_data: ExperienceUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    experience = experience_service.get(db=db, obj_id=experience_id)
+    experience = experience_service.get(
+        db=db,
+        obj_id=experience_id,
+    )
 
     if experience is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_experience(
 def delete_experience(
     experience_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    experience = experience_service.get(db=db, obj_id=experience_id)
+    experience = experience_service.get(
+        db=db,
+        obj_id=experience_id,
+    )
 
     if experience is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_experience(
             detail="Experience not found",
         )
 
-    experience_service.delete(db=db, obj=experience)
+    experience_service.delete(
+        db=db,
+        obj=experience,
+    )

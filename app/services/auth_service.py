@@ -19,10 +19,17 @@ class AuthService:
         Register a new user.
         """
 
-        if user_service.email_exists(db, user_data.email):
-            raise ValueError("Email already registered.")
+        if user_service.email_exists(
+            db,
+            user_data.email,
+        ):
+            raise ValueError(
+                "Email already registered.",
+            )
 
-        hashed_password = hash_password(user_data.password)
+        hashed_password = hash_password(
+            user_data.password,
+        )
 
         return user_service.create_user(
             db=db,
@@ -45,14 +52,18 @@ class AuthService:
             email,
         )
 
-        if not user:
-            raise ValueError("Invalid email or password.")
+        if user is None:
+            raise ValueError(
+                "Invalid email or password.",
+            )
 
         if not verify_password(
             password,
             user.hashed_password,
         ):
-            raise ValueError("Invalid email or password.")
+            raise ValueError(
+                "Invalid email or password.",
+            )
 
         return create_access_token(
             subject=user.id,

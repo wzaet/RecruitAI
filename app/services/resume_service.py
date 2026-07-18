@@ -2,7 +2,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.resume import Resume
-from app.schemas.resume import ResumeCreate, ResumeUpdate
+from app.schemas.resume import (
+    ResumeCreate,
+    ResumeUpdate,
+)
 from app.services.base_service import BaseService
 
 
@@ -19,7 +22,9 @@ class ResumeService(BaseService[Resume]):
             Resume.user_id == user_id,
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def get_public_resumes(
         self,
@@ -29,7 +34,9 @@ class ResumeService(BaseService[Resume]):
             Resume.is_public.is_(True),
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def create_resume(
         self,

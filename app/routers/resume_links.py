@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.resume_link import (
     ResumeLinkCreate,
@@ -9,18 +13,26 @@ from app.schemas.resume_link import (
 )
 from app.services.resume_link_service import resume_link_service
 
+
 router = APIRouter(
     prefix="/resume-links",
     tags=["Resume Links"],
 )
 
 
-@router.get("/{link_id}", response_model=ResumeLinkResponse)
+@router.get(
+    "/{link_id}",
+    response_model=ResumeLinkResponse,
+)
 def get_resume_link(
     link_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    link = resume_link_service.get(db=db, obj_id=link_id)
+    link = resume_link_service.get(
+        db=db,
+        obj_id=link_id,
+    )
 
     if link is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_resume_link(
 def create_resume_link(
     link_data: ResumeLinkCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return resume_link_service.create_resume_link(
         db=db,
@@ -46,13 +59,20 @@ def create_resume_link(
     )
 
 
-@router.put("/{link_id}", response_model=ResumeLinkResponse)
+@router.put(
+    "/{link_id}",
+    response_model=ResumeLinkResponse,
+)
 def update_resume_link(
     link_id: int,
     link_data: ResumeLinkUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    link = resume_link_service.get(db=db, obj_id=link_id)
+    link = resume_link_service.get(
+        db=db,
+        obj_id=link_id,
+    )
 
     if link is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_resume_link(
 def delete_resume_link(
     link_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    link = resume_link_service.get(db=db, obj_id=link_id)
+    link = resume_link_service.get(
+        db=db,
+        obj_id=link_id,
+    )
 
     if link is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_resume_link(
             detail="Resume link not found",
         )
 
-    resume_link_service.delete(db=db, obj=link)
+    resume_link_service.delete(
+        db=db,
+        obj=link,
+    )

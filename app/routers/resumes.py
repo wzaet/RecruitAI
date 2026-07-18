@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.resume import (
     ResumeCreate,
@@ -8,6 +12,7 @@ from app.schemas.resume import (
     ResumeUpdate,
 )
 from app.services.resume_service import resume_service
+
 
 router = APIRouter(
     prefix="/resumes",
@@ -22,6 +27,7 @@ router = APIRouter(
 def get_resume(
     resume_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     resume = resume_service.get(
         db=db,
@@ -45,6 +51,7 @@ def get_resume(
 def create_resume(
     resume_data: ResumeCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return resume_service.create_resume(
         db=db,
@@ -60,6 +67,7 @@ def update_resume(
     resume_id: int,
     resume_data: ResumeUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     resume = resume_service.get(
         db=db,
@@ -86,6 +94,7 @@ def update_resume(
 def delete_resume(
     resume_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
     resume = resume_service.get(
         db=db,

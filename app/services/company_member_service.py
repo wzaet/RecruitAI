@@ -22,7 +22,9 @@ class CompanyMemberService(BaseService[CompanyMember]):
             CompanyMember.company_id == company_id,
         )
 
-        return list(db.scalars(statement))
+        return list(
+            db.scalars(statement).all(),
+        )
 
     def get_membership(
         self,

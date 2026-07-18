@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.education import (
     EducationCreate,
@@ -9,18 +13,26 @@ from app.schemas.education import (
 )
 from app.services.education_service import education_service
 
+
 router = APIRouter(
     prefix="/educations",
     tags=["Educations"],
 )
 
 
-@router.get("/{education_id}", response_model=EducationResponse)
+@router.get(
+    "/{education_id}",
+    response_model=EducationResponse,
+)
 def get_education(
     education_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    education = education_service.get(db=db, obj_id=education_id)
+    education = education_service.get(
+        db=db,
+        obj_id=education_id,
+    )
 
     if education is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_education(
 def create_education(
     education_data: EducationCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return education_service.create_education(
         db=db,
@@ -46,13 +59,20 @@ def create_education(
     )
 
 
-@router.put("/{education_id}", response_model=EducationResponse)
+@router.put(
+    "/{education_id}",
+    response_model=EducationResponse,
+)
 def update_education(
     education_id: int,
     education_data: EducationUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    education = education_service.get(db=db, obj_id=education_id)
+    education = education_service.get(
+        db=db,
+        obj_id=education_id,
+    )
 
     if education is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_education(
 def delete_education(
     education_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    education = education_service.get(db=db, obj_id=education_id)
+    education = education_service.get(
+        db=db,
+        obj_id=education_id,
+    )
 
     if education is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_education(
             detail="Education not found",
         )
 
-    education_service.delete(db=db, obj=education)
+    education_service.delete(
+        db=db,
+        obj=education,
+    )

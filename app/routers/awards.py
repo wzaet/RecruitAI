@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.award import (
     AwardCreate,
@@ -9,18 +13,26 @@ from app.schemas.award import (
 )
 from app.services.award_service import award_service
 
+
 router = APIRouter(
     prefix="/awards",
     tags=["Awards"],
 )
 
 
-@router.get("/{award_id}", response_model=AwardResponse)
+@router.get(
+    "/{award_id}",
+    response_model=AwardResponse,
+)
 def get_award(
     award_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    award = award_service.get(db=db, obj_id=award_id)
+    award = award_service.get(
+        db=db,
+        obj_id=award_id,
+    )
 
     if award is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_award(
 def create_award(
     award_data: AwardCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return award_service.create_award(
         db=db,
@@ -46,13 +59,20 @@ def create_award(
     )
 
 
-@router.put("/{award_id}", response_model=AwardResponse)
+@router.put(
+    "/{award_id}",
+    response_model=AwardResponse,
+)
 def update_award(
     award_id: int,
     award_data: AwardUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    award = award_service.get(db=db, obj_id=award_id)
+    award = award_service.get(
+        db=db,
+        obj_id=award_id,
+    )
 
     if award is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_award(
 def delete_award(
     award_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    award = award_service.get(db=db, obj_id=award_id)
+    award = award_service.get(
+        db=db,
+        obj_id=award_id,
+    )
 
     if award is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_award(
             detail="Award not found",
         )
 
-    award_service.delete(db=db, obj=award)
+    award_service.delete(
+        db=db,
+        obj=award,
+    )

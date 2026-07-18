@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
 
 from app.models.company import Company
-from app.schemas.company import CompanyCreate, CompanyUpdate
+from app.schemas.company import (
+    CompanyCreate,
+    CompanyUpdate,
+)
 from app.services.base_service import BaseService
 
 

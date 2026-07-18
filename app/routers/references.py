@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.reference import (
     ReferenceCreate,
@@ -9,18 +13,26 @@ from app.schemas.reference import (
 )
 from app.services.reference_service import reference_service
 
+
 router = APIRouter(
     prefix="/references",
     tags=["References"],
 )
 
 
-@router.get("/{reference_id}", response_model=ReferenceResponse)
+@router.get(
+    "/{reference_id}",
+    response_model=ReferenceResponse,
+)
 def get_reference(
     reference_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    reference = reference_service.get(db=db, obj_id=reference_id)
+    reference = reference_service.get(
+        db=db,
+        obj_id=reference_id,
+    )
 
     if reference is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_reference(
 def create_reference(
     reference_data: ReferenceCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return reference_service.create_reference(
         db=db,
@@ -46,13 +59,20 @@ def create_reference(
     )
 
 
-@router.put("/{reference_id}", response_model=ReferenceResponse)
+@router.put(
+    "/{reference_id}",
+    response_model=ReferenceResponse,
+)
 def update_reference(
     reference_id: int,
     reference_data: ReferenceUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    reference = reference_service.get(db=db, obj_id=reference_id)
+    reference = reference_service.get(
+        db=db,
+        obj_id=reference_id,
+    )
 
     if reference is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_reference(
 def delete_reference(
     reference_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    reference = reference_service.get(db=db, obj_id=reference_id)
+    reference = reference_service.get(
+        db=db,
+        obj_id=reference_id,
+    )
 
     if reference is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_reference(
             detail="Reference not found",
         )
 
-    reference_service.delete(db=db, obj=reference)
+    reference_service.delete(
+        db=db,
+        obj=reference,
+    )

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.resume_skill import (
     ResumeSkillCreate,
@@ -9,16 +13,21 @@ from app.schemas.resume_skill import (
 )
 from app.services.resume_skill_service import resume_skill_service
 
+
 router = APIRouter(
     prefix="/resume-skills",
     tags=["Resume Skills"],
 )
 
 
-@router.get("/{resume_skill_id}", response_model=ResumeSkillResponse)
+@router.get(
+    "/{resume_skill_id}",
+    response_model=ResumeSkillResponse,
+)
 def get_resume_skill(
     resume_skill_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     resume_skill = resume_skill_service.get(
         db=db,
@@ -42,6 +51,7 @@ def get_resume_skill(
 def create_resume_skill(
     resume_skill_data: ResumeSkillCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return resume_skill_service.create_resume_skill(
         db=db,
@@ -57,6 +67,7 @@ def update_resume_skill(
     resume_skill_id: int,
     resume_skill_data: ResumeSkillUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     resume_skill = resume_skill_service.get(
         db=db,
@@ -83,6 +94,7 @@ def update_resume_skill(
 def delete_resume_skill(
     resume_skill_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
     resume_skill = resume_skill_service.get(
         db=db,

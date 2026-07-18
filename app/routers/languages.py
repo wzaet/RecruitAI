@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_admin,
+)
 from app.database.session import get_db
 from app.schemas.language import (
     LanguageCreate,
@@ -9,18 +13,26 @@ from app.schemas.language import (
 )
 from app.services.language_service import language_service
 
+
 router = APIRouter(
     prefix="/languages",
     tags=["Languages"],
 )
 
 
-@router.get("/{language_id}", response_model=LanguageResponse)
+@router.get(
+    "/{language_id}",
+    response_model=LanguageResponse,
+)
 def get_language(
     language_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    language = language_service.get(db=db, obj_id=language_id)
+    language = language_service.get(
+        db=db,
+        obj_id=language_id,
+    )
 
     if language is None:
         raise HTTPException(
@@ -39,6 +51,7 @@ def get_language(
 def create_language(
     language_data: LanguageCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
     return language_service.create_language(
         db=db,
@@ -46,13 +59,20 @@ def create_language(
     )
 
 
-@router.put("/{language_id}", response_model=LanguageResponse)
+@router.put(
+    "/{language_id}",
+    response_model=LanguageResponse,
+)
 def update_language(
     language_id: int,
     language_data: LanguageUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    language = language_service.get(db=db, obj_id=language_id)
+    language = language_service.get(
+        db=db,
+        obj_id=language_id,
+    )
 
     if language is None:
         raise HTTPException(
@@ -74,8 +94,12 @@ def update_language(
 def delete_language(
     language_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin),
 ):
-    language = language_service.get(db=db, obj_id=language_id)
+    language = language_service.get(
+        db=db,
+        obj_id=language_id,
+    )
 
     if language is None:
         raise HTTPException(
@@ -83,4 +107,7 @@ def delete_language(
             detail="Language not found",
         )
 
-    language_service.delete(db=db, obj=language)
+    language_service.delete(
+        db=db,
+        obj=language,
+    )

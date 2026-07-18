@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import (
+    get_current_active_user,
+    get_current_company,
+)
 from app.database.session import get_db
 from app.schemas.company import (
     CompanyCreate,
@@ -8,6 +12,7 @@ from app.schemas.company import (
     CompanyUpdate,
 )
 from app.services.company_service import company_service
+
 
 router = APIRouter(
     prefix="/companies",
@@ -21,10 +26,9 @@ router = APIRouter(
 )
 def get_companies(
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    return company_service.get_all(
-        db=db,
-    )
+    return company_service.get_all(db=db)
 
 
 @router.get(
@@ -34,11 +38,9 @@ def get_companies(
 def get_company(
     company_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
 ):
-    company = company_service.get(
-        db=db,
-        obj_id=company_id,
-    )
+    company = company_service.get(db=db, obj_id=company_id)
 
     if company is None:
         raise HTTPException(
@@ -57,6 +59,7 @@ def get_company(
 def create_company(
     company_data: CompanyCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_company),
 ):
     return company_service.create_company(
         db=db,
@@ -72,11 +75,9 @@ def update_company(
     company_id: int,
     company_data: CompanyUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_company),
 ):
-    company = company_service.get(
-        db=db,
-        obj_id=company_id,
-    )
+    company = company_service.get(db=db, obj_id=company_id)
 
     if company is None:
         raise HTTPException(
@@ -98,19 +99,6 @@ def update_company(
 def delete_company(
     company_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_company),
 ):
-    company = company_service.get(
-        db=db,
-        obj_id=company_id,
-    )
-
-    if company is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Company not found",
-        )
-
-    company_service.delete(
-        db=db,
-        obj=company,
-    )
+    company = company
