@@ -1,6 +1,7 @@
 from sqlalchemy import (
     Boolean,
     Column,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -16,8 +17,8 @@ from app.core.constants.field_lengths import (
 from app.database.base import Base
 
 
-class ResumeLink(Base):
-    __tablename__ = "resume_links"
+class Certificate(Base):
+    __tablename__ = "certificates"
 
     # ==========================
     # Primary Key
@@ -30,14 +31,14 @@ class ResumeLink(Base):
     )
 
     # ==========================
-    # Foreign Key
+    # Foreign Keys
     # ==========================
 
     resume_id = Column(
         Integer,
         ForeignKey(
             "resumes.id",
-            name="fk_resume_links_resume",
+            name="fk_certificates_resume",
             ondelete="CASCADE",
         ),
         nullable=False,
@@ -48,17 +49,33 @@ class ResumeLink(Base):
     # Business Fields
     # ==========================
 
-    platform = Column(
+    name = Column(
         String(NAME_LENGTH),
         nullable=False,
     )
 
-    url = Column(
-        String(URL_LENGTH),
+    issuing_organization = Column(
+        String(NAME_LENGTH),
         nullable=False,
     )
 
-    is_primary = Column(
+    issue_date = Column(
+        Date,
+    )
+
+    expiration_date = Column(
+        Date,
+    )
+
+    credential_id = Column(
+        String(NAME_LENGTH),
+    )
+
+    credential_url = Column(
+        String(URL_LENGTH),
+    )
+
+    does_not_expire = Column(
         Boolean,
         nullable=False,
         default=False,
@@ -93,5 +110,5 @@ class ResumeLink(Base):
 
     resume = relationship(
         "Resume",
-        back_populates="links",
+        back_populates="certificates",
     )

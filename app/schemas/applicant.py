@@ -1,19 +1,30 @@
-from pydantic import BaseModel, EmailStr
+from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
-class ApplicantCreate(BaseModel):
-    full_name: str
-    email: EmailStr
-    phone: str
+class ApplicationBase(BaseModel):
+    user_id: int
     job_id: int
+    resume_id: Optional[int] = None
+    cover_letter: Optional[str] = None
 
 
-class ApplicantResponse(BaseModel):
+class ApplicationCreate(ApplicationBase):
+    pass
+
+
+class ApplicationUpdate(BaseModel):
+    status: Optional[int] = None
+    resume_id: Optional[int] = None
+    cover_letter: Optional[str] = None
+
+
+class ApplicationResponse(ApplicationBase):
     id: int
-    full_name: str
-    email: str
-    phone: str
-    resume_path: str | None = None
+    status: int
+    created_at: datetime
+    updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
