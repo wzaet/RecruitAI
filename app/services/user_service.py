@@ -1,90 +1,80 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 
-from app.database.session import SessionLocal
 from app.models.user import User
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
+from app.schemas.user import UserCreate, UserUpdate
+from app.services.base_service import BaseService
 
 
-def hash_password(password: str):
-    return pwd_context.hash(password)
+class UserService(BaseService[User]):
+    def __init__(self) -> None:
+        super().__init__(User)
 
+    def get_by_email(
+        self,
+        db: Session,
+        email: str,
+    ) -> User | None:
+        statement = select(User).where(User.email == email)
+        return db.scalar(statement)
 
-def verify_password(
-    plain_password: str,
-    hashed_password: str
-):
-    return pwd_context.verify(
-        plain_password,
-        hashed_password
-    )
+    def get_by_username(
+        self,
+        db: Session,
+        username: str,
+    ) -> User | None:
+        statement = select(User).where(User.username == username)
+        return db.scalar(statement)
 
+    def email_exists(
+        self,
+        db: Session,
+        email: str,
+    ) -> bool:
+        return self.get_by_email(db, email) is not None
 
-def register_user(
-    full_name: str,
-    email: str,
-    phone: str,
-    password: str,
-    role: str = "candidate"
-):
-    db: Session = SessionLocal()
+    def username_exists(
+        self,
+        db: Session,
+        username: str,
+    ) -> bool:
+        return self.get_by_username(db, username) is not None
 
-    try:
-        existing = db.query(User).filter(
-            User.email == email
-        ).first()
-
-        if existing:
-            return {
-                "error": "Email already exists"
-            }
-
+    def create_user(
+        self,
+        db: Session,
+        user_data: UserCreate,
+    ) -> User:
         user = User(
-            full_name=full_name,
-            email=email,
-            phone=phone,
-            password=hash_password(password),
-            role=role
+            **user_data.model_dump(),
         )
 
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+        return self.create(
+            db=db,
+            obj=user,
+        )
 
-        return {
-            "id": user.id,
-            "message": "User registered successfully"
-        }
+    def update_user(
+        self,
+        db: Session,
+        user: User,
+        user_data: UserUpdate,
+    ) -> User:
+        update_data = user_data.model_dump(
+            exclude_unset=True,
+        )
 
-    finally:
-        db.close()
+        for field, value in update_data.items():
+            setattr(
+                user,
+                field,
+                value,
+            )
+
+        return self.update(
+            db=db,
+            obj=user,
+        )
 
 
-def authenticate_user(
-    email: str,
-    password: str
-):
-    db: Session = SessionLocal()
-
-    try:
-        user = db.query(User).filter(
-            User.email == email
-        ).first()
-
-        if not user:
-            return None
-
-        if not verify_password(
-            password,
-            user.password
-        ):
-            return None
-
-        return user
-
-    finally:
-        db.close()
+user_service = UserService()

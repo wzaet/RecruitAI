@@ -1,29 +1,93 @@
-def create_job(job: JobCreate, owner_id: int):
-    db = SessionLocal()
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-    try:
-        new_job = Job(
-            owner_id=owner_id,
-            title=job.title,
-            department=job.department,
-            location=job.location,
-            employment_type=job.employment_type,
-            salary_min=job.salary_min,
-            salary_max=job.salary_max,
-            experience=job.experience,
-            education=job.education,
-            description=job.description,
-            deadline=job.deadline,
+from app.models.job import Job
+from app.schemas.job import JobCreate, JobUpdate
+from app.services.base_service import BaseService
+
+
+class JobService(BaseService[Job]):
+    def __init__(self) -> None:
+        super().__init__(Job)
+
+    def get_by_company(
+        self,
+        db: Session,
+        company_id: int,
+    ) -> list[Job]:
+        statement = select(Job).where(
+            Job.company_id == company_id,
         )
 
-        db.add(new_job)
-        db.commit()
-        db.refresh(new_job)
+        return list(db.scalars(statement))
 
-        return {
-            "id": new_job.id,
-            "message": "Job created successfully"
-        }
+    def get_active_jobs(
+        self,
+        db: Session,
+    ) -> list[Job]:
+        statement = select(Job).where(
+            Job.is_active.is_(True),
+        )
 
-    finally:
-        db.close()
+        return list(db.scalars(statement))
+
+    def create_job(
+        self,
+        db: Session,
+        job_data: JobCreate,
+    ) -> Job:
+        job = Job(
+            **job_data.model_dump(),
+        )
+
+        return self.create(
+            db=db,
+            obj=job,
+        )
+
+    def update_job(
+        self,
+        db: Session,
+        job: Job,
+        job_data: JobUpdate,
+    ) -> Job:
+        update_data = job_data.model_dump(
+            exclude_unset=True,
+        )
+
+        for field, value in update_data.items():
+            setattr(
+                job,
+                field,
+                value,
+            )
+
+        return self.update(
+            db=db,
+            obj=job,
+        )
+
+    def activate(
+        self,
+        db: Session,
+        job: Job,
+    ) -> Job:
+        job.is_active = True
+        return self.update(
+            db=db,
+            obj=job,
+        )
+
+    def deactivate(
+        self,
+        db: Session,
+        job: Job,
+    ) -> Job:
+        job.is_active = False
+        return self.update(
+            db=db,
+            obj=job,
+        )
+
+
+job_service = JobService()
