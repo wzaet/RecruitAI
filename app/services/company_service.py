@@ -1,70 +1,75 @@
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.company import Company
-from app.schemas.company import CompanyCreate, CompanyUpdate
-from app.services.base_service import BaseService
+from app.schemas.company import (
+    CompanyCreate,
+    CompanyUpdate,
+)
 
 
-class CompanyService(BaseService[Company]):
-    def __init__(self) -> None:
-        super().__init__(Company)
+class CompanyService:
 
-    def get_by_slug(
+    def get(
         self,
         db: Session,
-        slug: str,
-    ) -> Company | None:
-        statement = select(Company).where(
-            Company.slug == slug,
+        obj_id: int,
+    ):
+        return (
+            db.query(Company)
+            .filter(Company.id == obj_id)
+            .first()
         )
-        return db.scalar(statement)
 
-    def slug_exists(
+    def get_all(
         self,
         db: Session,
-        slug: str,
-    ) -> bool:
-        return self.get_by_slug(
-            db,
-            slug,
-        ) is not None
+    ):
+        return db.query(Company).all()
 
     def create_company(
         self,
         db: Session,
         company_data: CompanyCreate,
-    ) -> Company:
+    ):
         company = Company(
-            **company_data.model_dump(),
+            **company_data.model_dump()
         )
 
-        return self.create(
-            db=db,
-            obj=company,
-        )
+        db.add(company)
+        db.commit()
+        db.refresh(company)
+
+        return company
 
     def update_company(
         self,
         db: Session,
         company: Company,
         company_data: CompanyUpdate,
-    ) -> Company:
+    ):
         update_data = company_data.model_dump(
-            exclude_unset=True,
+            exclude_unset=True
         )
 
-        for field, value in update_data.items():
+        for key, value in update_data.items():
             setattr(
                 company,
-                field,
+                key,
                 value,
             )
 
-        return self.update(
-            db=db,
-            obj=company,
-        )
+        db.commit()
+        db.refresh(company)
+
+        return company
+
+    def delete(
+        self,
+        db: Session,
+        obj: Company,
+    ):
+        db.delete(obj)
+        db.commit()
 
 
 company_service = CompanyService()

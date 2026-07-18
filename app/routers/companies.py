@@ -16,6 +16,18 @@ router = APIRouter(
 
 
 @router.get(
+    "/",
+    response_model=list[CompanyResponse],
+)
+def get_companies(
+    db: Session = Depends(get_db),
+):
+    return company_service.get_all(
+        db=db,
+    )
+
+
+@router.get(
     "/{company_id}",
     response_model=CompanyResponse,
 )
